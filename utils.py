@@ -1,13 +1,6 @@
-from flask import Flask, redirect, url_for, request, jsonify
+from pkg_resources import resource_filename
 import geoip2.database
-import psutil
-app = Flask(__name__)
-
-
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
-
+import hashlib
 
 def convert(process):
     country = ''
@@ -29,22 +22,20 @@ def convert(process):
 
 
 def getcountry(ip):
-    reader = geoip2.database.Reader("./static/ipdb.mmdb")
+    reader = geoip2.database.Reader(resource_filename(__name__, "./static/ipdb.mmdb"))
     return reader.country(ip).country.name
 
 
-@app.route('/getProcesses', methods=['POST'])
-def getprocesses():
-    if request.method == 'POST':
-        processes = psutil.net_connections()
-        result = list(map(convert, processes))
-        return jsonify(
-            {
-                "processes": result
-            }
-        )
+def hash_file(filename):
+    h = hashlib.sha1()
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
+    # open file for reading in binary mode
+    with open(filename,'rb') as file:
+        # loop till the end of the file
+        chunk = 0
+        while chunk != b'':
+            # read only 1024 bytes at a time
+            chunk = file.read(1024)
+            h.update(chunk)
+    # return the hex representation of digest
+    return str(h.hexdigest())
