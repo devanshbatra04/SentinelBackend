@@ -2,6 +2,7 @@ from flask import request, jsonify
 from sentinelbackend import app
 from sentinelbackend.utils import convert, getcountry
 from sentinelbackend.virustotal import lookup_process
+from sentinelbackend.models import addToBlacklist, removeFromBlacklist
 import psutil
 
 
@@ -27,3 +28,17 @@ def quickscan():
     if request.method == 'POST':
         lookup_process(request.form.get('PID'))
     return "bAS BSDK"
+
+
+@app.route('/blockIP', methods=['POST'])
+def block_ip():
+    if request.method == 'POST':
+        addToBlacklist(request.form.get('IP'))
+    return "blocked"
+
+
+@app.route('/unblockIP', methods=['POST'])
+def unblock_ip():
+    if request.method == 'POST':
+        removeFromBlacklist(request.form.get('IP'))
+    return "unblocked"
