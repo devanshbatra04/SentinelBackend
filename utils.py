@@ -10,18 +10,22 @@ def convert(process):
         elif process.raddr:
             country = getcountry(process.raddr.ip)
     except:
-        print("could not trace ip " + str(process.raddr.ip))
+        country = "could not trace in current database"
 
     return {
         'localAddr': process.laddr,
         'remoteAddr': process.raddr,
-        'PID': process.pid,
+        'PID': str(process.pid),
         'status': process.status,
         'country': country
     }
 
 
 def getcountry(ip):
+    if str(ip).__contains__("192.168"):
+        return "local area network"
+    elif str(ip) == '127.0.0.1' or str(ip) == '0.0.0.0':
+        return "localhost"
     reader = geoip2.database.Reader(resource_filename(__name__, "./static/ipdb.mmdb"))
     return reader.country(ip).country.name
 

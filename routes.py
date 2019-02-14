@@ -11,14 +11,14 @@ def hello_world():
     return 'Hello World!'
 
 
-@app.route('/getProcesses', methods=['POST'])
+@app.route('/getProcesses', methods=['GET', 'POST'])
 def getprocesses():
     if request.method == 'POST':
         processes = psutil.net_connections()
         result = list(map(convert, processes))
         return jsonify(
             {
-                "processes": result
+                "processes": list(filter(lambda x: len(x['remoteAddr']), result))
             }
         )
 

@@ -1,5 +1,6 @@
 from sentinelbackend import db
 import os
+import iptc
 
 
 class Blacklist(db.Model):
@@ -10,7 +11,13 @@ class Blacklist(db.Model):
 
 def addToBlacklist(ip, port='*'):
     user = Blacklist(ip=ip, port=port)
-    os.system('echo root | sudo -S iptables -A INPUT -s ' + ip + ' -j DROP')
+    rule = iptc.Rule()
+    rule.protocol = 0
+    rule.src = str(ip)
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    chain.insert_rule(rule)
     db.session.add(user)
     db.session.commit()
 
@@ -18,7 +25,13 @@ def addToBlacklist(ip, port='*'):
 def removeFromBlacklist(ip, port='*'):
     user = Blacklist.query.filter_by(ip=ip)
     user.delete()
-    os.system('echo root | sudo -S iptables -D INPUT -s ' + ip + ' -j DROP')
+    rule = iptc.Rule()
+    rule.protocol = 0
+    rule.src = str(ip)
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    chain.delete_rule(rule)
     db.session.commit()
 
 
@@ -30,6 +43,6 @@ def getRules():
 
 
 # db.drop_all()
-# db.create_all()
+db.create_all()
 # addToBlascklist()
 # removeFromBlacklist()
