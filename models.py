@@ -1,4 +1,5 @@
 from sentinelbackend import db
+from sentinelbackend.utils import hash_file
 import os
 import iptc
 
@@ -7,6 +8,11 @@ class Blacklist(db.Model):
     # sno = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ip = db.Column(db.String, primary_key=True)
     port = db.Column(db.String(5), nullable=False)
+
+
+class scheduledFiles(db.Model):
+    file = db.Column(db.String, primary_key=True)
+    hash = db.Column(db.String)
 
 
 def addToBlacklist(ip, port='*'):
@@ -42,7 +48,12 @@ def getRules():
     }, Blacklist.query.all()))
 
 
-# db.drop_all()
+def addScheduledFile(filepath, hash):
+    newFile = scheduledFiles(file=filepath, hash=hash)
+    db.session.add(newFile)
+    db.session.commit()
+
+db.drop_all()
 db.create_all()
 # addToBlascklist()
 # removeFromBlacklist()

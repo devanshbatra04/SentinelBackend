@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from sentinelbackend import app
 from sentinelbackend.utils import convert, getcountry
-from sentinelbackend.virustotal import lookup_process
+from sentinelbackend.virustotal import lookup_process, adv_scan, quickScan
 from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules
 import psutil
 
@@ -23,7 +23,7 @@ def getprocesses():
         )
 
 
-@app.route('/quickScan', methods=['POST'])
+@app.route('/lookupProcess', methods=['POST'])
 def quickscan():
     if request.method == 'POST':
         return jsonify(
@@ -55,3 +55,13 @@ def get_rules():
             "rules": list(getRules())
         }
     )
+
+
+@app.route('/advancedScan', methods=['POST'])
+def advanced_scan():
+    return adv_scan(request.form.get('filepath'))
+
+
+@app.route('/getReport', methods=['POST'])
+def quick_scan():
+    return jsonify(quickScan(request.form.get('filepath')))
