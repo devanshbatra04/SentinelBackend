@@ -26,8 +26,12 @@ def getprocesses():
 @app.route('/quickScan', methods=['POST'])
 def quickscan():
     if request.method == 'POST':
-        lookup_process(request.form.get('PID'))
-    return "bAS BSDK"
+        return jsonify(
+            {
+                "results":  lookup_process(request.form.get('PID'))
+
+            }
+        )
 
 
 @app.route('/blockIP', methods=['POST'])
