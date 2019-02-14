@@ -1,5 +1,4 @@
 from sentinelbackend import db
-from flask_sqlalchemy import SQLAlchemy
 import os
 
 
