@@ -13,8 +13,8 @@ def convert(process):
         print("could not trace ip " + str(process.raddr.ip))
 
     return {
-        'leftAddr': process.laddr,
-        'rightAddr': process.raddr,
+        'localAddr': process.laddr,
+        'remoteAddr': process.raddr,
         'PID': process.pid,
         'status': process.status,
         'country': country

@@ -17,12 +17,20 @@ def addToBlacklist(ip, port='*'):
 
 
 def removeFromBlacklist(ip, port='*'):
-    user = Blacklist(ip=ip, port=port)
+    user = Blacklist.query.filter_by(ip=ip)
+    user.delete()
     os.system('echo root | sudo -S iptables -D INPUT -s ' + ip + ' -j DROP')
     db.session.commit()
 
 
+def getRules():
+    return list(map(lambda x: {
+        "ip": x.ip,
+        "port": x.port
+    }, Blacklist.query.all()))
+
+
 # db.drop_all()
 # db.create_all()
-# addToBlacklist()
+# addToBlascklist()
 # removeFromBlacklist()

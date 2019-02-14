@@ -2,7 +2,7 @@ from flask import request, jsonify
 from sentinelbackend import app
 from sentinelbackend.utils import convert, getcountry
 from sentinelbackend.virustotal import lookup_process
-from sentinelbackend.models import addToBlacklist, removeFromBlacklist
+from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules
 import psutil
 
 
@@ -42,3 +42,12 @@ def unblock_ip():
     if request.method == 'POST':
         removeFromBlacklist(request.form.get('IP'))
     return "unblocked"
+
+
+@app.route('/getRules', methods=['POST'])
+def get_rules():
+    return jsonify(
+        {
+            "rules": list(getRules())
+        }
+    )
