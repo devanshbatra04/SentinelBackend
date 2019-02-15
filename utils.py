@@ -1,4 +1,5 @@
 from pkg_resources import resource_filename
+import psutil
 import geoip2.database
 import hashlib
 
@@ -13,11 +14,15 @@ def convert(process):
         country = "could not trace in current database"
 
     return {
+        # TODO return correct connection type/protocol also
         'localAddr': process.laddr,
         'remoteAddr': process.raddr,
         'PID': str(process.pid),
         'status': process.status,
-        'country': country
+        'country': country,
+        "Pname": psutil.Process(process.pid).name(),
+        "User": psutil.Process(process.pid).username(),
+        "cType": "tcp"
     }
 
 
