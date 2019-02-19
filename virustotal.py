@@ -39,7 +39,7 @@ def adv_scan(filePath):
     try:
         json_response = response.json()
         if json_response["verbose_msg"] == "Scan request successfully queued, come back later for the report":
-            addScheduledFile(filePath, json_response["sha1"])
+            addScheduledFile(filePath, json_response["sha1"], user="Devansh")
         return {
             'message': json_response["verbose_msg"]
         }
