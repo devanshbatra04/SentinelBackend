@@ -2,7 +2,7 @@ from flask import request, jsonify
 from sentinelbackend import app
 from sentinelbackend.utils import convert, getcountry
 from sentinelbackend.virustotal import lookup_process, adv_scan, quickScan
-from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules
+from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules, getScheduledFiles
 import psutil
 
 
@@ -59,7 +59,16 @@ def get_rules():
 
 @app.route('/advancedScan', methods=['POST'])
 def advanced_scan():
-    return adv_scan(request.form.get('filepath'))
+    return jsonify(adv_scan(request.form.get('filepath')))
+
+
+@app.route('/getScheduledFiles', methods=['POST'])
+def getS():
+    return jsonify(
+        {
+            "files": getScheduledFiles()
+        }
+    )
 
 
 @app.route('/getReport', methods=['POST'])

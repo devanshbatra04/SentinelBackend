@@ -48,12 +48,19 @@ def getRules():
     }, Blacklist.query.all()))
 
 
+def getScheduledFiles():
+    return list(map(lambda x: {
+        "file": x.file,
+        "hash": x.hash
+    }, scheduledFiles.query.all()))
+
+
 def addScheduledFile(filepath, hash):
     newFile = scheduledFiles(file=filepath, hash=hash)
     db.session.add(newFile)
     db.session.commit()
 
-db.drop_all()
+# db.drop_all()
 db.create_all()
 # addToBlascklist()
 # removeFromBlacklist()

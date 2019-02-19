@@ -44,6 +44,7 @@ def adv_scan(filePath):
             'message': json_response["verbose_msg"]
         }
     except:
+        print(json_response)
         return {
             'message': 'Too many VirusTotal requests, try again later'
         }
