@@ -78,7 +78,10 @@ def quick_scan():
 @app.route('/killProcess', methods=['POST'])
 def killProcess():
     if request.method == 'POST':
-        pid = int(request.form.get('PID'))
-        process = psutil.Process(pid)
-        process.kill()
-    return "process terminated"
+        try:
+            pid = int(request.form.get('PID'))
+            process = psutil.Process(pid)
+            process.kill()
+            return "process terminated"
+        except:
+            return "some error occured. Are you sure you have sudo priviledge"
