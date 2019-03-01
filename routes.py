@@ -1,3 +1,5 @@
+import sqlalchemy
+
 from flask import request, jsonify
 from sentinelbackend import app
 from sentinelbackend.utils import convert, getcountry
@@ -37,15 +39,14 @@ def quickscan():
 @app.route('/blockIP', methods=['POST'])
 def block_ip():
     if request.method == 'POST':
-        addToBlacklist(request.form.get('IP'))
-    return "blocked"
-
+        response = addToBlacklist(request.form.get('IP'), request.form.get('port') if request.form.get('port') != None else "*")
+        return response
 
 @app.route('/unblockIP', methods=['POST'])
 def unblock_ip():
     if request.method == 'POST':
-        removeFromBlacklist(request.form.get('IP'))
-    return "unblocked"
+        response = removeFromBlacklist(request.form.get('IP'), request.form.get('port') if request.form.get('port') != None else "*")
+        return response
 
 
 @app.route('/getRules', methods=['POST'])

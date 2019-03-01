@@ -1,3 +1,5 @@
+import sqlalchemy
+
 from sentinelbackend import db
 from sentinelbackend.utils import hash_file
 import os
@@ -8,7 +10,7 @@ import datetime
 class Blacklist(db.Model):
     # sno = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ip = db.Column(db.String, primary_key=True)
-    port = db.Column(db.String(5), nullable=False)
+    port = db.Column(db.String(6), primary_key=True)
 
 
 class scheduledFiles(db.Model):
@@ -18,31 +20,59 @@ class scheduledFiles(db.Model):
     user = db.Column(db.String)
 
 
-def addToBlacklist(ip, port='*'):
+def addToBlacklist(ip, port):
     user = Blacklist(ip=ip, port=port)
-    rule = iptc.Rule()
-    rule.protocol = 0
-    rule.src = str(ip)
-    target = iptc.Target(rule, "DROP")
-    rule.target = target
-    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
-    chain.insert_rule(rule)
-    db.session.add(user)
-    db.session.commit()
+    try:
+        db.session.add(user)
+        db.session.commit()
+        if port != '*':
+            command = ("iptables -A INPUT -p tcp --sport {} -s {} -j DROP").format(str(port), str(ip))
+            os.system(command)
+        else:
+            rule = iptc.Rule()
+            rule.protocol = 0
+            rule.src = str(ip)
+            target = iptc.Target(rule, "DROP")
+            rule.target = target
+            chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+            chain.insert_rule(rule)
+        return "blocked"
+    except sqlalchemy.exc.IntegrityError:
+        return "ip {} is already blocked on {} port".format(ip, port if port != '*' else "all")
 
 
-def removeFromBlacklist(ip, port='*'):
-    user = Blacklist.query.filter_by(ip=ip)
-    user.delete()
-    rule = iptc.Rule()
-    rule.protocol = 0
-    rule.src = str(ip)
-    target = iptc.Target(rule, "DROP")
-    rule.target = target
-    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
-    chain.delete_rule(rule)
-    db.session.commit()
-
+def removeFromBlacklist(ip, port):
+    if port != '*':
+        user = Blacklist.query.filter_by(ip=ip).filter_by(port=port)
+        check = 0 if len(list(user)) == 0 else 1
+        print("check : ", check);
+        if check == 1:
+            command = ("iptables -D INPUT -p tcp --sport {} -s {} -j DROP").format(str(port), str(ip))
+            os.system(command)
+            user.delete()
+            db.session.commit()
+            return "unblocked"
+        else:
+            return "no such rule present"
+    else:
+        blockedIPlist = Blacklist.query.filter_by(ip = ip)
+        # print(list(blockedIPlist))
+        for blackList in blockedIPlist:
+            print("djcndjbv", blackList.ip, blackList.port)
+            if blackList.port == '*':
+                rule = iptc.Rule()
+                rule.protocol = 0
+                rule.src = str(ip)
+                target = iptc.Target(rule, "DROP")
+                rule.target = target
+                chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+                chain.delete_rule(rule)
+            else:
+                command = ("iptables -D INPUT -p tcp --sport {} -s {} -j DROP").format(str(blackList.port), str(blackList.ip))
+                os.system(command)
+        blockedIPlist.delete()
+        db.session.commit()
+        return "unblocked"
 
 def getRules():
     return list(map(lambda x: {
