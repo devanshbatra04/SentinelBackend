@@ -39,6 +39,8 @@ def scanIp(ip):
     json_response = response.json()
     return {
         "average_percent": (len(json_response["detected_downloaded_samples"])/(len(json_response["detected_downloaded_samples"]) + len(json_response["undetected_downloaded_samples"]))) * 100,
+        "negatives": len(json_response["undetected_downloaded_samples"]),
+        "positives": len(json_response["detected_downloaded_samples"])
     }
 
 def adv_scan(filePath):
