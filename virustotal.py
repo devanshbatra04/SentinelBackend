@@ -5,7 +5,7 @@ from sentinelbackend.models import addScheduledFile
 
 
 def quickScan(file):
-    params = {'apikey': 'd21b1c0487ea217eda6e715bd9a6663c05c7a1655a3167767c0d85528a402344',
+    params = {'apikey': 'b93c0b8303dce792601b675ad8cd05b4366b2841a9261115ad4ad6a88398d20d',
               'resource': hash_file(file)}
     headers = {"Accept-Encoding": "gzip, deflate",
                "User-Agent": "gzip,  My Python requests library example client or username"}
@@ -33,7 +33,7 @@ def lookup_process(id):
 
 
 def adv_scan(filePath):
-    params = {'apikey': 'd21b1c0487ea217eda6e715bd9a6663c05c7a1655a3167767c0d85528a402344'}
+    params = {'apikey': 'b93c0b8303dce792601b675ad8cd05b4366b2841a9261115ad4ad6a88398d20d'}
     files = {'file': (filePath.split('/')[-1], open(filePath, 'rb'))}
     response = requests.post('https://www.virustotal.com/vtapi/v2/file/scan', files=files, params=params)
     try:
