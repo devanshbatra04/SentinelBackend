@@ -164,3 +164,20 @@ def getf():
             {
                 "files": ans
             })
+
+@app.route('/getConnectedCountries', methods=['POST'])
+def countries():
+    if request.method == 'POST':
+        processes = psutil.net_connections()
+        s = {}
+        result = list(map(convert, processes))
+        for item in result:
+            if dict(item)["country"] == "" or dict(item)["country"] == "local address":
+                continue
+            s[
+               dict(item)["country"]] = len(list(filter(lambda x: x["country"] == item["country"], result)))
+        return jsonify(
+            {
+                "results": s
+            }
+        )
