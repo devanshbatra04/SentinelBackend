@@ -1,5 +1,6 @@
 import psutil
 import requests
+import functools
 from sentinelbackend.utils import hash_file
 from sentinelbackend.models import addScheduledFile
 
@@ -35,9 +36,10 @@ def scanIp(ip):
     url = 'https://www.virustotal.com/vtapi/v2/ip-address/report'
     params = {'ip': str(ip), 'apikey': 'b93c0b8303dce792601b675ad8cd05b4366b2841a9261115ad4ad6a88398d20d'}
     response = requests.get(url, params=params)
-    print(response)
     json_response = response.json()
-    print(json_response)
+    return {
+        "average_percent": (len(json_response["detected_downloaded_samples"])/(len(json_response["detected_downloaded_samples"]) + len(json_response["undetected_downloaded_samples"]))) * 100,
+    }
 
 def adv_scan(filePath):
     params = {'apikey': 'b93c0b8303dce792601b675ad8cd05b4366b2841a9261115ad4ad6a88398d20d'}

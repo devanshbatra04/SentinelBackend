@@ -1,10 +1,9 @@
-import sqlalchemy
-
+import os
 from flask import request, jsonify
 from sentinelbackend import app
 from sentinelbackend.utils import convert, getcountry
-from sentinelbackend.virustotal import lookup_process, adv_scan, quickScan
-from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules, getScheduledFiles
+from sentinelbackend.virustotal import lookup_process, adv_scan, quickScan, scanIp as virusTotalIPScan
+from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules, getScheduledFiles, removeFileFromScheduled
 import psutil
 
 
@@ -101,6 +100,23 @@ def getS():
         }
     )
 
+@app.route('/removeFromScheduledFilesList', methods=['POST'])
+def removeFromList():
+    removeFileFromScheduled(request.form.get('filepath'))
+    return "removed from list"
+
+
+@app.route('/deleteFile', methods=['POST'])
+def deleteme():
+    os.remove(request.form.get('filepath'))
+    return "deleted"
+
+@app.route('/scanIP', methods=['POST'])
+def scanIP():
+    return jsonify({
+        "results": virusTotalIPScan(request.form.get('IP'))
+    })
+
 
 @app.route('/getReport', methods=['POST'])
 def quick_scan():
@@ -117,3 +133,4 @@ def killProcess():
             return "process terminated"
         except:
             return "some error occured. Are you sure you have sudo priviledge"
+

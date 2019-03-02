@@ -93,6 +93,12 @@ def addScheduledFile(filepath, hash, user="Devansh"):
     db.session.add(newFile)
     db.session.commit()
 
+def removeFileFromScheduled(filepath):
+    file = scheduledFiles.query.filter_by(file=filepath)
+    file.delete()
+    db.session.commit()
+
+
 # db.drop_all()
 db.create_all()
 # addToBlascklist()
