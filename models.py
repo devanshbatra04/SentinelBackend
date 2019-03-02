@@ -98,7 +98,6 @@ def removeFileFromScheduled(filepath):
     file.delete()
     db.session.commit()
 
-
 # db.drop_all()
 db.create_all()
 # addToBlascklist()

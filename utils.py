@@ -2,7 +2,7 @@ from pkg_resources import resource_filename
 import psutil
 import geoip2.database
 import hashlib
-
+from os.path import expanduser
 
 def convert(process):
     country = ''
@@ -60,3 +60,27 @@ def hash_file(filename):
             h.update(chunk)
     # return the hex representation of digest
     return str(h.hexdigest())
+
+
+def fetchScanResults(path):
+    f = open(expanduser(path), "r")
+    contents = f.read()
+    contents = contents.split('\n')
+    # print(list(map(lambda x: x, contents)))
+    # def filterer(x):
+    #     return x.includes(" : ")
+    # list(lambda y: y.split(" : "), contents)
+    return list(map(lambda y:
+                   {
+                       "infection_name" : y.split(" : ")[0],
+                       "scan_result": y.split(" : ")[1]
+    }, filter(lambda x: (" : ") in x, contents)))
+
+
+def getSuspectFiles(path):
+    path = expanduser("~/chkrootkitLogs/suspectedPaths.txt")
+    f = open(expanduser(path), "r")
+    contents = f.read()
+    contents = contents.split('\n')
+    contents = list(map(lambda c: c.split(' '), contents))
+    return contents

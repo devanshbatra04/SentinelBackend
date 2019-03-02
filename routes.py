@@ -1,11 +1,11 @@
 import os
 from flask import request, jsonify
 from sentinelbackend import app
-from sentinelbackend.utils import convert, getcountry
+from sentinelbackend.utils import convert, getcountry, fetchScanResults, getSuspectFiles
 from sentinelbackend.virustotal import lookup_process, adv_scan, quickScan, scanIp as virusTotalIPScan
 from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules, getScheduledFiles, removeFileFromScheduled
 import psutil
-
+from os.path import expanduser
 
 @app.route('/')
 def hello_world():
@@ -134,3 +134,33 @@ def killProcess():
         except:
             return "some error occured. Are you sure you have sudo priviledge"
 
+
+@app.route('/getchkrScanResults', methods=['POST'])
+def chkscan():
+    if request.method == 'POST':
+        return jsonify({
+            "results": fetchScanResults("~/chkrootkitLogs/fileLog.txt")
+        })
+
+
+@app.route('/chkrScan', methods=['POST'])
+def scan():
+    if request.method == 'POST':
+        os.system(expanduser("~/chkrootkit2 -q"))
+    return "Scan Complete"
+
+
+@app.route('/getSuspectFiles', methods=['POST'])
+def getf():
+    if request.method == 'POST':
+        ans = []
+        for e in getSuspectFiles(' '):
+            if isinstance(e, list):
+                for i in e:
+                    ans.append(i)
+            else:
+                ans.append(e)
+        return jsonify(
+            {
+                "files": ans
+            })
