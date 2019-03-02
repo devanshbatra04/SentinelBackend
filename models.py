@@ -3,9 +3,10 @@ import sqlalchemy
 from sentinelbackend import db
 from sentinelbackend.utils import hash_file
 import os
-import iptc
 import datetime
 
+if os.name != 'nt':
+    import iptc
 
 class Blacklist(db.Model):
     # sno = db.Column(db.Integer, primary_key=True, autoincrement=True)
