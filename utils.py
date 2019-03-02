@@ -3,13 +3,16 @@ import psutil
 import geoip2.database
 import hashlib
 
+
 def convert(process):
     country = ''
+    company = ''
     try:
         if process.raddr and process.raddr.ip == '127.0.0.1':
-            country = "local address"
+            country = company = "local address"
         elif process.raddr:
             country = getcountry(process.raddr.ip)
+            company = getCompany(process.raddr.ip)
     except:
         country = "could not trace in current database"
 
@@ -22,7 +25,8 @@ def convert(process):
         'country': country,
         "Pname": psutil.Process(process.pid).name(),
         "User": psutil.Process(process.pid).username(),
-        "cType": "tcp"
+        "cType": "tcp",
+        'company': company
     }
 
 
@@ -33,6 +37,14 @@ def getcountry(ip):
         return "localhost"
     reader = geoip2.database.Reader(resource_filename(__name__, "./static/ipdb.mmdb"))
     return reader.country(ip).country.name
+
+def getCompany(ip):
+    if str(ip).__contains__("192.168"):
+        return "local area network"
+    elif str(ip) == '127.0.0.1' or str(ip) == '0.0.0.0':
+        return "localhost"
+    reader = geoip2.database.Reader(resource_filename(__name__, "./static/asndb.mmdb"))
+    return reader.asn(ip).autonomous_system_organization
 
 
 def hash_file(filename):

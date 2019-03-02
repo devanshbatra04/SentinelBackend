@@ -31,6 +31,13 @@ def lookup_process(id):
     open_files = map(lambda x: x.path, file_list)
     return list(map(lambda file: quickScan(file), list(open_files)))
 
+def scanIp(ip):
+    url = 'https://www.virustotal.com/vtapi/v2/ip-address/report'
+    params = {'ip': str(ip), 'apikey': 'b93c0b8303dce792601b675ad8cd05b4366b2841a9261115ad4ad6a88398d20d'}
+    response = requests.get(url, params=params)
+    print(response)
+    json_response = response.json()
+    print(json_response)
 
 def adv_scan(filePath):
     params = {'apikey': 'b93c0b8303dce792601b675ad8cd05b4366b2841a9261115ad4ad6a88398d20d'}
