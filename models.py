@@ -45,7 +45,6 @@ def removeFromBlacklist(ip, port):
     if port != '*':
         user = Blacklist.query.filter_by(ip=ip).filter_by(port=port)
         check = 0 if len(list(user)) == 0 else 1
-        print("check : ", check);
         if check == 1:
             command = ("iptables -D INPUT -p tcp --sport {} -s {} -j DROP").format(str(port), str(ip))
             os.system(command)
@@ -56,9 +55,7 @@ def removeFromBlacklist(ip, port):
             return "no such rule present"
     else:
         blockedIPlist = Blacklist.query.filter_by(ip = ip)
-        # print(list(blockedIPlist))
         for blackList in blockedIPlist:
-            print("djcndjbv", blackList.ip, blackList.port)
             if blackList.port == '*':
                 rule = iptc.Rule()
                 rule.protocol = 0
