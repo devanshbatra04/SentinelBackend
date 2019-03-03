@@ -1,7 +1,6 @@
 import sqlalchemy
-
-from sentinelbackend import db
 from sentinelbackend.utils import hash_file
+from sentinelbackend import db
 import os
 import datetime
 
@@ -17,6 +16,15 @@ class badIP(db.Model):
     # sno = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ip = db.Column(db.String, primary_key=True)
     count = db.Column(db.Integer)
+
+def getbadIphealth(ip):
+    if ip == 0:
+        return 0
+    result = list(badIP.query.filter_by(ip=ip))
+    if len(result) > 0:
+        return 6 + int((result.count % 10) / 1000) if result.count > 5 else result.count
+    else:
+        return 0
 
 class scheduledFiles(db.Model):
     file = db.Column(db.String, primary_key=True)
@@ -140,7 +148,7 @@ def badIPdetected(ip):
         pass
 
 
-db.drop_all()
+# db.drop_all()
 
 db.create_all()
 # addToBlascklist()

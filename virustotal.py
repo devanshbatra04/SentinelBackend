@@ -1,7 +1,7 @@
 import psutil
+from sentinelbackend.utils import hash_file
 import requests
 import functools
-from sentinelbackend.utils import hash_file
 from sentinelbackend.models import addScheduledFile
 
 
@@ -78,3 +78,4 @@ def adv_scan(filePath):
         return {
             'message': 'Too many VirusTotal requests, try again later'
         }
+

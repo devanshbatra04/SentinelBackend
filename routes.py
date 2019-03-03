@@ -1,11 +1,14 @@
 import os
+from sentinelbackend.utils import convertforWindows, getcountry, fetchScanResults, getSuspectFiles, getCompany
+
 from flask import request, jsonify
 from sentinelbackend import app
-from sentinelbackend.utils import convertforWindows, getcountry, fetchScanResults, getSuspectFiles, convert
 from sentinelbackend.virustotal import lookup_process, adv_scan, quickScan, scanIp as virusTotalIPScan
-from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules, getScheduledFiles, removeFileFromScheduled
+from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules, getScheduledFiles, removeFileFromScheduled, getbadIphealth
 import psutil
 from os.path import expanduser
+from sentinelbackend.models import getbadIphealth
+
 
 @app.route('/')
 def hello_world():
@@ -193,3 +196,30 @@ def countries():
                 "results": s
             }
         )
+
+def convert(process):
+    country = ''
+    company = ''
+    try:
+        if process.raddr and process.raddr.ip == '127.0.0.1':
+            country = company = "local address"
+        elif process.raddr:
+            country = getcountry(process.raddr.ip)
+            company = getCompany(process.raddr.ip)
+    except:
+        country = "could not trace in current database"
+
+    return {
+        # TODO return correct connection type/protocol also
+        'localAddr': process.laddr,
+        'remoteAddr': process.raddr,
+        'PID': str(process.pid),
+        'status': process.status,
+        'country': country,
+        "Pname": psutil.Process(process.pid).name(),
+        "User": psutil.Process(process.pid).username(),
+        "cType": "tcp",
+        'company': company,
+        "health": getbadIphealth(process.raddr.ip if process.raddr else 0)
+    }
+

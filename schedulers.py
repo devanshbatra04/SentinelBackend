@@ -1,9 +1,9 @@
 import psutil
 import datetime
+from sentinelbackend.utils import getCompany
 import requests
 from sentinelbackend.models import badIPdetected
 from sentinelbackend.virustotal import lookup_process
-from sentinelbackend.utils import getCompany
 from apscheduler.schedulers.background import BackgroundScheduler
 import geoip2
 
@@ -62,9 +62,7 @@ def quickscanner():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=ipscanner, trigger="interval", seconds=600)
+scheduler.add_job(func=ipscanner, trigger="interval", seconds=4)
 # scheduler.add_job(func=quickscanner, trigger="interval", seconds=600)
-scheduler.start()
+# scheduler.start()
 
-
-# quickscanner()
