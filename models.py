@@ -23,6 +23,11 @@ class scheduledFiles(db.Model):
     time = db.Column(db.String)
     user = db.Column(db.String)
 
+class badProcess(db.Model):
+    PID = db.Column(db.Integer, primary_key=True)
+    IP = db.Column(db.String, primary_key=True)
+    positives = db.Column(db.Integer)
+    totals = db.Column(db.Integer)
 
 def addToBlacklist(ip, port):
     user = Blacklist(ip=ip, port=port)
@@ -116,7 +121,7 @@ def badIPdetected(ip):
         pass
 
 
-# db.drop_all()
+db.drop_all()
 db.create_all()
 # addToBlascklist()
 # removeFromBlacklist()
