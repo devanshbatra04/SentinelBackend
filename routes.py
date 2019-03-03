@@ -1,11 +1,11 @@
 import os
 from flask import request, jsonify
 from sentinelbackend import app
-from sentinelbackend.utils import convert, getcountry
+from sentinelbackend.utils import convertforWindows, getcountry, fetchScanResults, getSuspectFiles, convert
 from sentinelbackend.virustotal import lookup_process, adv_scan, quickScan, scanIp as virusTotalIPScan
 from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules, getScheduledFiles, removeFileFromScheduled
 import psutil
-
+from os.path import expanduser
 
 @app.route('/')
 def hello_world():
@@ -14,7 +14,15 @@ def hello_world():
 
 @app.route('/getProcesses', methods=['GET', 'POST'])
 def getprocesses():
-    if request.method == 'POST':
+    if request.method == 'POST' and os.name == 'nt':
+        pids = psutil.pids()
+        result = list(map(convertforWindows, pids))
+        return jsonify(
+            {
+                "processes" : list(filter(lambda x: len(x['remoteAddr']), list(filter(lambda x : x != None, result))))
+            }
+        )
+    elif request.method == 'POST':
         processes = psutil.net_connections()
         result = list(map(convert, processes))
         return jsonify(
@@ -43,12 +51,14 @@ def getsystemUsage():
 def getProcessUsageStats():
     # TODO implement full function
     if request.method == 'POST':
-        pid = request.form.get('PID')
+        pid = int(request.form.get('PID'))
+        process = psutil.Process(pid=pid)
         return jsonify(
             {
-                "cpu_uasage":"40",
-                "memory_usage": "40",
-                "disk_io_percent": [(100.0 * n_c[i + 1]) / (n_c[i] if n_c[i] != 0 else 1) for i in range(0, len(n_c) - 1, 2)]
+                "cpu_uasage": process.cpu_percent(interval=2),
+                "memory_usage": str(int(process.memory_info().rss) / ( 1024 * 1024 ))+ " MB" ,
+                # "disk_io_percent": [(100.0 * n_c[i + 1]) / (n_c[i] if n_c[i] != 0 else 1) for i in range(0, len(n_c) - 1, 2)],
+                # "network_io_percent": ""
             }
         )
 
@@ -107,8 +117,11 @@ def removeFromList():
 
 @app.route('/deleteFile', methods=['POST'])
 def deleteme():
-    os.remove(request.form.get('filepath'))
-    return "deleted"
+    try:
+        os.remove(expanduser(request.form.get('filepath')))
+        return "deleted"
+    except:
+        return "file not found"
 
 @app.route('/scanIP', methods=['POST'])
 def scanIP():
@@ -133,3 +146,50 @@ def killProcess():
         except:
             return "some error occured. Are you sure you have sudo priviledge"
 
+
+@app.route('/getchkrScanResults', methods=['POST'])
+def chkscan():
+    if request.method == 'POST':
+        return jsonify({
+            "results": fetchScanResults("~/chkrootkitLogs/fileLog.txt")
+        })
+
+
+@app.route('/chkrScan', methods=['POST'])
+def scan():
+    if request.method == 'POST':
+        os.system(expanduser("~/chkrootkit2 -q"))
+    return "Scan Complete"
+
+
+@app.route('/getSuspectFiles', methods=['POST'])
+def getf():
+    if request.method == 'POST':
+        ans = []
+        for e in getSuspectFiles(' '):
+            if isinstance(e, list):
+                for i in e:
+                    ans.append(i)
+            else:
+                ans.append(e)
+        return jsonify(
+            {
+                "files": ans
+            })
+
+@app.route('/getConnectedCountries', methods=['POST'])
+def countries():
+    if request.method == 'POST':
+        processes = psutil.net_connections()
+        s = {}
+        result = list(map(convert, processes))
+        for item in result:
+            if dict(item)["country"] == "" or dict(item)["country"] == "local address":
+                continue
+            s[
+               dict(item)["country"]] = len(list(filter(lambda x: x["country"] == item["country"], result)))
+        return jsonify(
+            {
+                "results": s
+            }
+        )

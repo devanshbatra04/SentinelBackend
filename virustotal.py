@@ -37,8 +37,29 @@ def scanIp(ip):
     params = {'ip': str(ip), 'apikey': 'b93c0b8303dce792601b675ad8cd05b4366b2841a9261115ad4ad6a88398d20d'}
     response = requests.get(url, params=params)
     json_response = response.json()
+    print(json_response)
+    if json_response.get("detected_downloaded_samples") is None:
+        return {
+            "average_percent": 1 * 100,
+            "negatives": len(json_response["undetected_downloaded_samples"]),
+            "positives": 0
+        }
+    if len(json_response.get("detected_downloaded_samples")) == 0 and len(json_response.get("undetected_downloaded_samples")) == 0:
+        return {
+            "average_percent": 1 * 100,
+            "negatives": len(json_response["undetected_downloaded_samples"]),
+            "positives": len(json_response["detected_downloaded_samples"])
+        }
+    if len(json_response.get("detected_downloaded_samples")) == 0 and len(json_response.get("undetected_downloaded_samples")) == 0:
+        return {
+            "average_percent": 1 * 100,
+            "negatives": len(json_response["undetected_downloaded_samples"]),
+            "positives": len(json_response["detected_downloaded_samples"])
+        }
     return {
         "average_percent": (len(json_response["detected_downloaded_samples"])/(len(json_response["detected_downloaded_samples"]) + len(json_response["undetected_downloaded_samples"]))) * 100,
+        "negatives": len(json_response["undetected_downloaded_samples"]),
+        "positives": len(json_response["detected_downloaded_samples"])
     }
 
 def adv_scan(filePath):
