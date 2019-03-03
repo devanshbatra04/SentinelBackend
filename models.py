@@ -26,6 +26,9 @@ def addToBlacklist(ip, port):
     try:
         db.session.add(user)
         db.session.commit()
+        if os.name == 'nt':
+            os.system("netsh advfirewall firewall add rule name='IP block' dir=in protocol=tcp remoteip={} localport={} action=block".format(ip, port))
+            return "blocked"
         if port != '*':
             command = ("iptables -A INPUT -p tcp --sport {} -s {} -j DROP").format(str(port), str(ip))
             os.system(command)
@@ -43,6 +46,12 @@ def addToBlacklist(ip, port):
 
 
 def removeFromBlacklist(ip, port):
+    if os.name == 'nt':
+        user = Blacklist.query.filter_by(ip=ip).filter_by(port=port)
+        user.delete()
+        db.session.commit()
+        os.system("netsh advfirewall firewall delete rule name='IP block' dir=in protocol=tcp remoteip={} localport={}".format(ip, port))
+        return "unblocked"
     if port != '*':
         user = Blacklist.query.filter_by(ip=ip).filter_by(port=port)
         check = 0 if len(list(user)) == 0 else 1

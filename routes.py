@@ -19,7 +19,6 @@ def getprocesses():
         result = list(map(convert, pids))
         return jsonify(
             {
-                # "processes": list(filter(lambda x: len(x['remoteAddr']), result))
                 "processes" : list(filter(lambda x: len(x['remoteAddr']), list(filter(lambda x : x != None, result))))
             }
         )
