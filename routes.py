@@ -51,13 +51,14 @@ def getsystemUsage():
 def getProcessUsageStats():
     # TODO implement full function
     if request.method == 'POST':
-        pid = request.form.get('PID')
+        pid = int(request.form.get('PID'))
+        process = psutil.Process(pid=pid)
         return jsonify(
             {
-                "cpu_uasage":"40",
-                "memory_usage": "40",
-                "disk_io_percent": [(100.0 * n_c[i + 1]) / (n_c[i] if n_c[i] != 0 else 1) for i in range(0, len(n_c) - 1, 2)],
-                "network_io_percent": ""
+                "cpu_uasage": process.cpu_percent(interval=2),
+                "memory_usage": str(int(process.memory_info().rss) / ( 1024 * 1024 ))+ " MB" ,
+                # "disk_io_percent": [(100.0 * n_c[i + 1]) / (n_c[i] if n_c[i] != 0 else 1) for i in range(0, len(n_c) - 1, 2)],
+                # "network_io_percent": ""
             }
         )
 
