@@ -22,7 +22,7 @@ def getbadIphealth(ip):
         return 0
     result = list(badIP.query.filter_by(ip=ip))
     if len(result) > 0:
-        return 6 + int((result.count % 10) / 1000) if result.count > 5 else result.count
+        return 6 + int((result.count % 10) / 5) if result.count > 5 else result.count
     else:
         return 0
 
