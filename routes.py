@@ -116,8 +116,11 @@ def removeFromList():
 
 @app.route('/deleteFile', methods=['POST'])
 def deleteme():
-    os.remove(request.form.get('filepath'))
-    return "deleted"
+    try:
+        os.remove(expanduser(request.form.get('filepath')))
+        return "deleted"
+    except:
+        return "file not found"
 
 @app.route('/scanIP', methods=['POST'])
 def scanIP():
