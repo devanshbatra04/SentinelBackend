@@ -4,7 +4,7 @@ import geoip2.database
 import hashlib
 from os.path import expanduser
 
-def convert(pid):
+def convertforWindows(pid):
     try:
         process = psutil.Process(pid).connections()[0]
         country = ''
@@ -33,6 +33,30 @@ def convert(pid):
     except:
         pass
     
+def convert(process):
+    country = ''
+    company = ''
+    try:
+        if process.raddr and process.raddr.ip == '127.0.0.1':
+            country = company = "local address"
+        elif process.raddr:
+            country = getcountry(process.raddr.ip)
+            company = getCompany(process.raddr.ip)
+    except:
+        country = "could not trace in current database"
+
+    return {
+        # TODO return correct connection type/protocol also
+        'localAddr': process.laddr,
+        'remoteAddr': process.raddr,
+        'PID': str(process.pid),
+        'status': process.status,
+        'country': country,
+        "Pname": psutil.Process(process.pid).name(),
+        "User": psutil.Process(process.pid).username(),
+        "cType": "tcp",
+        'company': company
+    }
 
 
 def getcountry(ip):
