@@ -5,5 +5,5 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 db = SQLAlchemy(app)
 
 
-from sentinelbackend import routes
+from sentinelbackend import routes, schedulers
 from sentinelbackend.models import addToBlacklist

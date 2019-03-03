@@ -12,6 +12,10 @@ class Blacklist(db.Model):
     ip = db.Column(db.String, primary_key=True)
     port = db.Column(db.String(6), primary_key=True)
 
+class badIP(db.Model):
+    # sno = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ip = db.Column(db.String, primary_key=True)
+    count = db.Column(db.Integer)
 
 class scheduledFiles(db.Model):
     file = db.Column(db.String, primary_key=True)
@@ -98,8 +102,22 @@ def removeFileFromScheduled(filepath):
     file.delete()
     db.session.commit()
 
+def badIPdetected(ip):
+    oldIp = badIP.query.filter_by(ip=ip)
+    # print(list(oldIp)[0])
+    if oldIp is None or len(list(oldIp)) == 0:
+        newIp = badIP(ip=ip, count=1)
+        db.session.add(newIp)
+        db.session.commit()
+    else:
+        ip = oldIp.first()
+        ip.count = ip.count + 1
+        db.session.commit()
+        pass
+
 
 # db.drop_all()
 db.create_all()
 # addToBlascklist()
 # removeFromBlacklist()
+# badIPdetected("12.12.12.12")

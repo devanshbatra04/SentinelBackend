@@ -48,8 +48,7 @@ def getProcessUsageStats():
             {
                 "cpu_uasage":"40",
                 "memory_usage": "40",
-                "disk_io_percent": [(100.0 * n_c[i + 1]) / (n_c[i] if n_c[i] != 0 else 1) for i in range(0, len(n_c) - 1, 2)],
-                "network_io_percent": ""
+                "disk_io_percent": [(100.0 * n_c[i + 1]) / (n_c[i] if n_c[i] != 0 else 1) for i in range(0, len(n_c) - 1, 2)]
             }
         )
 
