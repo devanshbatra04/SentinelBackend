@@ -3,9 +3,10 @@ import sqlalchemy
 from sentinelbackend import db
 from sentinelbackend.utils import hash_file
 import os
-import iptc
 import datetime
 
+if os.name != 'nt':
+    import iptc
 
 class Blacklist(db.Model):
     # sno = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -27,8 +28,17 @@ def addToBlacklist(ip, port):
         db.session.commit()
         if port != '*':
             command = ("iptables -A INPUT -p tcp --sport {} -s {} -j DROP").format(str(port), str(ip))
+            if os.name == 'nt':
+                command = "netsh advfirewall firewall add rule name=IPblock dir=in protocol=tcp remoteip={} localport={} action=block".format(ip, port)
+                print(command)
             os.system(command)
+            return "blocked"
         else:
+            if os.name == 'nt':
+                command = "netsh advfirewall firewall add rule name=IPblock dir=in protocol=tcp remoteip={} action=block".format(ip)
+                print(command)
+                os.system(command)
+                return "blocked"
             rule = iptc.Rule()
             rule.protocol = 0
             rule.src = str(ip)
@@ -42,6 +52,15 @@ def addToBlacklist(ip, port):
 
 
 def removeFromBlacklist(ip, port):
+    if os.name == 'nt':
+        user = Blacklist.query.filter_by(ip=ip).filter_by(port=port)
+        user.delete()
+        db.session.commit()
+        command = "netsh advfirewall firewall delete rule name=IPblock dir=in protocol=tcp remoteip={} localport={}".format(ip, port)
+        if port=='*':
+            command = "netsh advfirewall firewall delete rule name=IPblock dir=in protocol=tcp remoteip={}".format(ip)
+        os.system(command)
+        return "unblocked"
     if port != '*':
         user = Blacklist.query.filter_by(ip=ip).filter_by(port=port)
         check = 0 if len(list(user)) == 0 else 1

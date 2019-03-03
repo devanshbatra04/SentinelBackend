@@ -1,7 +1,7 @@
 import os
 from flask import request, jsonify
 from sentinelbackend import app
-from sentinelbackend.utils import convert, getcountry, fetchScanResults, getSuspectFiles
+from sentinelbackend.utils import convertforWindows, getcountry, fetchScanResults, getSuspectFiles, convert
 from sentinelbackend.virustotal import lookup_process, adv_scan, quickScan, scanIp as virusTotalIPScan
 from sentinelbackend.models import addToBlacklist, removeFromBlacklist, getRules, getScheduledFiles, removeFileFromScheduled
 import psutil
@@ -14,7 +14,15 @@ def hello_world():
 
 @app.route('/getProcesses', methods=['GET', 'POST'])
 def getprocesses():
-    if request.method == 'POST':
+    if request.method == 'POST' and os.name == 'nt':
+        pids = psutil.pids()
+        result = list(map(convertforWindows, pids))
+        return jsonify(
+            {
+                "processes" : list(filter(lambda x: len(x['remoteAddr']), list(filter(lambda x : x != None, result))))
+            }
+        )
+    elif request.method == 'POST':
         processes = psutil.net_connections()
         result = list(map(convert, processes))
         return jsonify(
